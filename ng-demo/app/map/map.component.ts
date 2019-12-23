@@ -1,4 +1,4 @@
-import {Component, ViewChild} from '@angular/core';
+import {Component } from '@angular/core';
 import { registerElement } from 'nativescript-angular/element-registry';
 import { MapView, Marker, Position } from 'nativescript-google-maps-sdk';
 
@@ -22,7 +22,8 @@ export class MapComponent {
     bearing = 0;
     tilt = 0;
     padding = [40, 40, 40, 40];
-    mapView: MapView;
+    //without infoWindowTemplates : mapView: MapView;
+    mapView: MapView & {infoWindowTemplates: string};
 
     lastCamera: String;
 
@@ -31,9 +32,20 @@ export class MapComponent {
 
     //Map events
     onMapReady(event) {
-        console.log('Map Ready');
+        console.log("Map Ready");
 
         this.mapView = event.object;
+
+        console.log("Setting up the info window template");
+
+        let infoWindowTemplate = `
+            <template key="myTemplate">
+                <StackLayout className="infoView" orientation="vertical" width="200" height="150">
+                    <Label text="{{description}}" className="description"></Label>
+                </StackLayout>
+            </template>
+        `;
+        this.mapView.infoWindowTemplates = infoWindowTemplate;
 
         console.log("Setting a marker...");
 
@@ -41,7 +53,9 @@ export class MapComponent {
         marker.position = Position.positionFromLatLng(-33.86, 151.20);
         marker.title = "Sydney";
         marker.snippet = "Australia";
-        marker.userData = {index: 1};
+        marker.userData = {index: 1, description: 'will be shown in the template'};
+        marker.infoWindowTemplate = 'myTemplate';
+
         this.mapView.addMarker(marker);
     }
 
